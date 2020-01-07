@@ -3,6 +3,7 @@
 namespace Doctrine\Common\Persistence\Mapping;
 
 use Doctrine\Common\Reflection\RuntimePublicReflectionProperty;
+use Doctrine\Common\Reflection\TypedNoDefaultReflectionProperty;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -65,6 +66,9 @@ class RuntimeReflectionService implements ReflectionService
         if ($reflectionProperty->isPublic()) {
             $reflectionProperty = new RuntimePublicReflectionProperty($class, $property);
         }
+		if (PHP_VERSION_ID >= 70400 && $reflectionProperty->hasType() && !isset($reflectionProperty->getDeclaringClass()->getDefaultProperties()[$property])) {
+			$reflectionProperty = new TypedNoDefaultReflectionProperty($class, $property);
+		}
 
         $reflectionProperty->setAccessible(true);
 

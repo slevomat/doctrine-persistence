@@ -5,6 +5,7 @@ namespace Doctrine\Tests\Common\Persistence\Mapping;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\Common\Reflection\RuntimePublicReflectionProperty;
+use Doctrine\Common\Reflection\TypedNoDefaultReflectionProperty;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use function count;
@@ -14,6 +15,7 @@ use function count;
  */
 class RuntimeReflectionServiceTest extends TestCase
 {
+
     /** @var RuntimeReflectionService */
     private $reflectionService;
 
@@ -67,5 +69,22 @@ class RuntimeReflectionServiceTest extends TestCase
 
         $reflProp = $this->reflectionService->getAccessibleProperty(self::class, 'unusedPublicProperty');
         self::assertInstanceOf(RuntimePublicReflectionProperty::class, $reflProp);
+        if (PHP_VERSION_ID >= 70400) {
+            $reflProp = $this->reflectionService->getAccessibleProperty(PHP74TypedProperty::class, 'default');
+            self::assertInstanceOf(ReflectionProperty::class, $reflProp);
+
+            $reflProp = $this->reflectionService->getAccessibleProperty(PHP74TypedProperty::class, 'noDefault');
+            self::assertInstanceOf(TypedNoDefaultReflectionProperty::class, $reflProp);
+        }
+    }
+}
+if (PHP_VERSION_ID >= 70400) {
+    class PHP74TypedProperty
+    {
+
+        private string $noDefault;
+
+        private string $default = 'foo';
+
     }
 }
